@@ -106,7 +106,16 @@ func (e *ExpEval) EvalToBool(expr string, values map[string]interface{}) (bool, 
 		return false, err
 	}
 
-	return constant.BoolVal(tav.Value), nil
+	if tav.Type == nil {
+		return false, invalidValueErr
+	}
+
+	switch tav.Type.(*types.Basic).Kind() {
+	case types.Bool, types.UntypedBool:
+		return constant.BoolVal(tav.Value), nil
+	}
+
+	return false, invalidValueErr
 }
 
 // EvalToString returns the evaluated value(string)
@@ -119,7 +128,16 @@ func (e *ExpEval) EvalToString(expr string, values map[string]interface{}) (stri
 		return "", err
 	}
 
-	return constant.StringVal(tav.Value), nil
+	if tav.Type == nil {
+		return "", invalidValueErr
+	}
+
+	switch tav.Type.(*types.Basic).Kind() {
+	case types.String, types.UntypedString:
+		return constant.StringVal(tav.Value), nil
+	}
+
+	return "", invalidValueErr
 }
 
 // EvalToInt64 returns the evaluated value(int64)
@@ -133,12 +151,23 @@ func (e *ExpEval) EvalToInt64(expr string, values map[string]interface{}) (int64
 		return i, err
 	}
 
-	i, b := constant.Int64Val(tav.Value)
-	if !b {
-		return i, unknownInt64Err
+	if tav.Type == nil {
+		return i, invalidValueErr
 	}
 
-	return i, nil
+	switch tav.Type.(*types.Basic).Kind() {
+	case types.Int, types.Int8, types.Int16, types.Int32, types.Int64, types.UntypedInt:
+		var b bool
+		i, b = constant.Int64Val(tav.Value)
+
+		if !b {
+			return i, unknownInt64Err
+		}
+
+		return i, nil
+	}
+
+	return i, invalidValueErr
 }
 
 // EvalToUint64 returns the evaluated value(uint64)
@@ -152,12 +181,23 @@ func (e *ExpEval) EvalToUint64(expr string, values map[string]interface{}) (uint
 		return i, err
 	}
 
-	i, b := constant.Uint64Val(tav.Value)
-	if !b {
-		return i, unknownUint64Err
+	if tav.Type == nil {
+		return i, invalidValueErr
 	}
 
-	return i, nil
+	switch tav.Type.(*types.Basic).Kind() {
+	case types.Uint, types.Uint8, types.Uint16, types.Uint32, types.Uint64:
+		var b bool
+		i, b = constant.Uint64Val(tav.Value)
+
+		if !b {
+			return i, unknownUint64Err
+		}
+
+		return i, nil
+	}
+
+	return i, invalidValueErr
 }
 
 // EvalToFloat64 returns the evaluated value(float64)
@@ -171,10 +211,21 @@ func (e *ExpEval) EvalToFloat64(expr string, values map[string]interface{}) (flo
 		return f, err
 	}
 
-	f, b := constant.Float64Val(tav.Value)
-	if !b {
-		return f, unknownFloat64Err
+	if tav.Type == nil {
+		return f, invalidValueErr
 	}
 
-	return f, nil
+	switch tav.Type.(*types.Basic).Kind() {
+	case types.Float32, types.Float64, types.UntypedFloat:
+		var b bool
+		f, b = constant.Float64Val(tav.Value)
+
+		if !b {
+			return f, unknownFloat64Err
+		}
+
+		return f, nil
+	}
+
+	return f, invalidValueErr
 }
