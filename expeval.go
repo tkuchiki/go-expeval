@@ -12,6 +12,7 @@ var (
 	unknownInt64Err   = errors.New("unknown int64 value")
 	unknownUint64Err  = errors.New("unknown uint64 value")
 	unknownFloat64Err = errors.New("unknown float64 value")
+	invalidValueErr   = errors.New("invalid value")
 )
 
 // A ExpEval is expression evaluation
@@ -60,6 +61,10 @@ func (e *ExpEval) Eval(expr string, values map[string]interface{}) (interface{},
 	tav, err := types.Eval(token.NewFileSet(), pkg, token.NoPos, expr)
 	if err != nil {
 		return i, err
+	}
+
+	if tav.Type == nil {
+		return i, invalidValueErr
 	}
 
 	var b bool
