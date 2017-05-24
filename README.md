@@ -6,7 +6,7 @@ Expression evaluation for golang
 ---
 
 ```go
-import "go-expeval"
+import "github.com/tkuchiki/go-expeval"
 ```
 
 
